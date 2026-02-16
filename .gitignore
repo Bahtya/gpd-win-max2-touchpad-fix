@@ -1,0 +1,29 @@
+# Claude Code
+.claude/
+
+# Windows
+*.log
+*.tmp
+*.temp
+~$*
+Thumbs.db
+Desktop.ini
+
+# PowerShell
+*.ps1xml
+
+# Python (if used)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
