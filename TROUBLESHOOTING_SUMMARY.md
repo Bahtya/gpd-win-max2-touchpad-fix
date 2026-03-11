@@ -41,18 +41,22 @@ Windows 电源管理关闭了 I2C HID 设备，导致触控板点击功能失效
 
 ### 3. 解决方案设计
 
-#### 主要修复: 禁用 USB 选择性挂起
+#### Windows 修复: 禁用 USB 选择性挂起
+...
+#### Linux 修复: 禁用 Runtime Power Management
 
-```cmd
-powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48672f38-7a9a-4bb2-8bf8-3d85be19de4e 0
-powercfg /setdcvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48672f38-7a9a-4bb2-8bf8-3d85be19de4e 0
+在 Linux (Bazzite/Fedora) 中，问题的本质相同：内核的运行时电源管理 (Runtime PM) 会挂起 I2C 控制器。
+
+**udev 规则定义:**
+```udev
+ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="PNP0C50:00", ATTR{power/control}="on"
+ACTION=="add", SUBSYSTEM=="i2c", KERNELS=="AMDI0010:00", ATTR{power/control}="on"
 ```
 
-#### 辅助修复:
-
-1. **禁用快速启动** - 防止驱动加载问题
-2. **启动 Tablet Input Service** - 确保触控服务运行
-3. **重启 I2C HID 设备** - 强制重新加载驱动
+**执行脚本 (`fix_touchpad.sh`):**
+1. 创建 `/etc/udev/rules.d/99-gpd-win-max2-touchpad.rules`
+2. 重新加载 udev 规则并触发：`udevadm control --reload-rules && udevadm trigger`
+3. 实时写入 `/sys/devices/platform/AMDI0010:00/power/control` 为 `on`
 
 ---
 
